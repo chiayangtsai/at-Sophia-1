@@ -968,7 +968,7 @@ public:
   vector<int> findLeafs(STreeNode *root) {
     // f(root) = f(root->left) + f(root->right)
     //
-    // HW0830
+    // HW0831
     vector<int> leafs;
     
     //excetion/base
