@@ -101,6 +101,11 @@ int main(int argc, char **argv) {
   // - find layer of leaves
   // - balanced tree
   // - find target and k-distance nodes
+  // recursive
+  // - backtracking + memo(optional)
+  // - function parsing
+  // - permutation
+  // 
 
   //-- expereinced --
 }
