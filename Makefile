@@ -1,7 +1,7 @@
 all: main
 
 CXX = clang++
-override CXXFLAGS += -g -Wall -Werror -Wunused-variable
+override CXXFLAGS += -g -Wall -Werror -Wno-unused-variable -Wno-unused-but-set-variable
 
 SRCS = $(shell find . -name '.ccls-cache' -type d -prune -o -type f -name '*.cpp' -print | sed -e 's/ /\\ /g')
 HEADERS = $(shell find . -name '.ccls-cache' -type d -prune -o -type f -name '*.h' -print)
