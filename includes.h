@@ -23,3 +23,6 @@ void basic_binary_tree();
 // mid-level
 void basic_binaryTree_creation_breathFirst();
 void basic_binaryTree_creation_depthFirst();
+void basic_binaryTree_traversal();
+void leetcode_balanced_tree();
+void leetcode_recursive_leafs();
