@@ -19,10 +19,19 @@ void leetcode_find_leafs();
 void leetcode_power_of_two();
 void basic_binary_tree();
 
-
 // mid-level
 void basic_binaryTree_creation_breathFirst();
 void basic_binaryTree_creation_depthFirst();
 void basic_binaryTree_traversal();
 void leetcode_balanced_tree();
 void leetcode_recursive_leafs();
+void basic_digit_manipulation();
+void leetcode_revert_integer();
+void leetcode_even_odd_diff();
+void basic_heapify();
+void basic_heap_sort();
+void leetcode_bt_findKthMin();
+void basic_quickSort();
+void basic_mergeSort();
+void leetcode_bt_distanceK();
+

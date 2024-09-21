@@ -96,25 +96,37 @@ int main(int argc, char **argv) {
   case 34:
     leetcode_recursive_leafs();
     break;
+  case 35: // decimal, binary representation
+    basic_digit_manipulation();
+    break;
+  case 36:
+    leetcode_revert_integer();
+    break;
+  case 37:
+    leetcode_even_odd_diff();
+    break;
+  case 38: // heapify
+    basic_heapify();
+    break;
+  case 39: // sort
+    basic_heap_sort();
+    break;
+  case 40:
+    leetcode_bt_findKthMin();
+    break;
+  case 41:
+    basic_quickSort();
+    break;
+  case 42:
+    basic_mergeSort();
+    break;
+  case 43:
+    leetcode_bt_distanceK();
+    break;
   default:
     printf("not a supproted ID : %d\n", testID);
     exit(-1);
   }
-
-  //-- middle --
-  // binay tree basic (definition, balanced, complete)
-  // - find BT leaves
-  // binary tree creation and traversals
-  // - find layer of leaves
-  // - balanced tree
-  // - find target and k-distance nodes
-  // recursive
-  // - backtracking + memo(optional)
-  // - function parsing
-  // - permutation
-  //
-
-  //-- expereinced --
 }
 
 struct STreeNode {
@@ -1673,3 +1685,89 @@ void leetcode_recursive_leafs() {
     printf("\n");
   }
 }
+
+void basic_digit_manipulation() {}
+
+int revertInteger(int num) {
+  // TBD
+  return -1;
+}
+
+void leetcode_revert_integer() {
+  int num = 12345;
+  num = revertInteger(num);
+  printf("reverted number = %d (ans : 54321)\n", num);
+}
+
+int funcEvenOddDiff(int x) {
+  // TBD
+  return -1;
+}
+void leetcode_even_odd_diff() {
+  int X = 263541;
+  //|(2+3+4) - (6+5+1)| = 3
+  int diff = funcEvenOddDiff(X);
+  printf("diff =%d (ans : 3)\n", diff);
+
+  X = 131;
+  // |(1+1)- 3| = 1
+  diff = funcEvenOddDiff(X);
+  printf("diff =%d (ans : 1)\n", diff);
+}
+
+void basic_heapify() {}
+void basic_heap_sort() {}
+
+int funcFindKthMinFromArray(vector<int> vecData, int k) {
+  // TBD
+  return -1;
+}
+void leetcode_bt_findKthMin() {
+  // Given any array/vector, find the K-min number.
+  vector<int> vecData({5, 4, 1, 9, 2, 3});
+  printf("input= { ");
+  for (auto &ir : vecData) {
+    printf("%d ", ir);
+  }
+  printf("}\n");
+
+  int k = 3;
+  int kthMin = funcFindKthMinFromArray(vecData, k);
+  printf("%d-min is %d\n\n", k, kthMin);
+}
+
+void basic_quickSort() {
+  vector<int> inVec({1, 6, 2, 9, 3, 7, 2, 0, 2, 8, 5});
+  printf("== unsorted ==\n");
+  for (auto &ir : inVec) {
+    printf("%d ", ir);
+  }
+  printf("\n");
+  // TBD
+
+  printf("== sorted ==\n");
+  for (auto &ir : inVec) {
+    printf("%d ", ir);
+  }
+  printf("\n");
+}
+
+void basic_mergeSort() {
+  vector<int> inVec({1, 6, 2, 9, 3, 7, 2, 0, 2, 8, 5});
+  printf("== unsorted ==\n");
+  for (auto &ir : inVec) {
+    printf("%d ", ir);
+  }
+  printf("\n");
+
+  // TBD
+  printf("== sorted ==\n");
+  for (auto &ir : inVec) {
+    printf("%d ", ir);
+  }
+  printf("\n");
+
+  // Comparisons TBD
+}
+
+void leetcode_bt_distanceK() {}
