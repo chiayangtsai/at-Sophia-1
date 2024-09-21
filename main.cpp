@@ -16,7 +16,7 @@ using namespace std;
 
 int main(int argc, char **argv) {
 
-  int testID = 31;
+  int testID = 32;
   if (argc < 2)
     printf("default testID : %d\n\n", testID);
   else
@@ -103,24 +103,27 @@ int main(int argc, char **argv) {
     leetcode_revert_integer();
     break;
   case 37:
+    leetcode_bits_resersal();
+    break;
+  case 38:
     leetcode_even_odd_diff();
     break;
-  case 38: // heapify
+  case 39: // heapify
     basic_heapify();
     break;
-  case 39: // sort
+  case 40: // sort
     basic_heap_sort();
     break;
-  case 40:
+  case 41:
     leetcode_bt_findKthMin();
     break;
-  case 41:
+  case 42:
     basic_quickSort();
     break;
-  case 42:
+  case 43:
     basic_mergeSort();
     break;
-  case 43:
+  case 45:
     leetcode_bt_distanceK();
     break;
   default:
@@ -1401,20 +1404,19 @@ STreeNode *createDFPostOrderRec(vector<STreeNode> &nodes, int startIdx,
 
   if (startIdx + 1 == endIdx) // only 2 nodes
   {
-    root = &(nodes[startIdx]);
-    root->right = &(nodes[endIdx]); // endIdx-node could be either left or right
+    root = &(nodes[endIdx]);
+    root->right =
+        &(nodes[startIdx]); // startIdx-node could be either left or right
     return root;
   }
 
   // general
   int rootIdx = endIdx;
   root = &(nodes[rootIdx]);
-  int len = endIdx;
+  int len = (endIdx - 1) - startIdx + 1;
 
-  root->right =
-      createDFPostOrderRec(nodes, startIdx + 1 + (len / 2), endIdx - 1);
-  root->left =
-      createDFPostOrderRec(nodes, startIdx, startIdx + 1 + (len / 2) - 1);
+  root->left = createDFPostOrderRec(nodes, startIdx, startIdx + (len / 2) - 1);
+  root->right = createDFPostOrderRec(nodes, startIdx + (len / 2), endIdx - 1);
 
   return root;
 }
@@ -1516,18 +1518,65 @@ void basic_binaryTree_creation_depthFirst() {
 }
 
 vector<int> traverseBTPreOrder(STreeNode *root) {
-  // TBD
-  return vector<int>(0);
+  //       8
+  //    /     \
+  //   5        3
+  //  /   \    /
+  // 2    9   1
+
+  // Pre-order traversal : root, left, right:  {8, 5, 2, 9, 3, 1}
+  // f(x) = {root} + f(x->left) + f(x->right)
+  vector<int> traversed;
+  // exception
+  if (root == nullptr)
+    return traversed;
+
+  // general
+  traversed.push_back(root->val);
+
+  vector<int> childnodes = traverseBTPreOrder(root->left);
+  traversed.insert(traversed.end(), childnodes.begin(), childnodes.end());
+
+  childnodes = traverseBTPreOrder(root->right);
+  traversed.insert(traversed.end(), childnodes.begin(), childnodes.end());
+
+  return traversed;
 }
 
 vector<int> traverseBTInOrder(STreeNode *root) {
-  // TBD
-  return vector<int>(0);
+  // f(x) = f(x->left) + {root} + f(x->right)
+  vector<int> traversed;
+  // exception
+  if (root == nullptr)
+    return traversed;
+
+  // general
+  vector<int> childnodes = traverseBTInOrder(root->left);
+  traversed.insert(traversed.end(), childnodes.begin(), childnodes.end());
+
+  traversed.push_back(root->val);
+
+  childnodes = traverseBTInOrder(root->right);
+  traversed.insert(traversed.end(), childnodes.begin(), childnodes.end());
+
+  return traversed;
 }
 
 vector<int> traverseBTPostOrder(STreeNode *root) {
-  // TBD
-  return vector<int>(0);
+  vector<int> traversed;
+  // exception
+  if (root == nullptr)
+    return traversed;
+
+  // general
+  vector<int> childnodes = traverseBTPostOrder(root->left);
+  traversed.insert(traversed.end(), childnodes.begin(), childnodes.end());
+
+  childnodes = traverseBTPostOrder(root->right);
+  traversed.insert(traversed.end(), childnodes.begin(), childnodes.end());
+
+  traversed.push_back(root->val);
+  return traversed;
 }
 
 void basic_binaryTree_traversal() {
@@ -1573,25 +1622,8 @@ void basic_binaryTree_traversal() {
 }
 
 void getInOrderBinaryTreeBalanced(STreeNode *tree) {
-  // TBD
+  // HW0921
 }
-
-class CRecurLeafBase {
-public:
-  virtual vector<vector<int>> getLayeredLeaveValues(STreeNode *tree) {
-    printf("No implementation\n");
-    return vector<vector<int>>(0);
-  }
-};
-
-class CRecurLeaf : public CRecurLeafBase {
-public:
-  vector<vector<int>> getLayeredLeaveValues(STreeNode *tree) {
-    // TBD
-    return vector<vector<int>>(0);
-  }
-};
-
 void leetcode_balanced_tree() {
   vector<STreeNode> nodeData(6);
   nodeData[0].val = 7;
@@ -1629,18 +1661,42 @@ void leetcode_balanced_tree() {
   printNodes(nodeData);
 }
 
+class CRecurLeafBase {
+public:
+  virtual vector<vector<int>> getLayeredLeaveValues(STreeNode *tree) {
+    printf("No implementation\n");
+    return vector<vector<int>>(0);
+  }
+};
+
+class CRecurLeaf : public CRecurLeafBase {
+public:
+  vector<vector<int>> getLayeredLeaveValues(STreeNode *tree) {
+    // HW0921
+    return vector<vector<int>>(0); // To be modified
+  }
+};
+
+class CRecurLeafVK : public CRecurLeafBase {
+public:
+  vector<vector<int>> getLayeredLeaveValues(STreeNode *tree) {
+    printf("No implementation\n");
+    return vector<vector<int>>(0);
+  }
+};
+
 void leetcode_recursive_leafs() {
 
   //             7
   //            / \
-//           9   1
+  //           9   1
   //          /     \
-//         5       2
+  //         5       2
   //     {5, 2}, {9, 1}, {7}
 
   //             7
   //            / \
-//           9   1
+  //           9   1
   //          /
   //         5
   //     {5, 1}, {9}, {7}
@@ -1661,9 +1717,9 @@ void leetcode_recursive_leafs() {
   nodeData[6].val = 2;
   //             7
   //            / \
-//           9   1
+  //           9   1
   //          / \    \
-//         5   4   2
+  //         5   4   2
   //             /
   //            6
   //
@@ -1671,8 +1727,19 @@ void leetcode_recursive_leafs() {
 
   //---------------//
   STreeNode *tree = &(nodeData[0]);
+
   CRecurLeaf solDerived;
-  CRecurLeafBase *sol = &solDerived;
+  CRecurLeafVK solVK;
+  CRecurLeafBase *sol = nullptr;
+
+  int impltID = 0;
+
+  if (impltID == 0) {
+    sol = &solDerived;
+  } else {
+    sol = &solVK;
+  }
+
   // Q:  Given binary tree, print out the leave values at different layers
   //   Examples: {5, 6, 2} {4, 1} {9}, {7}
 
@@ -1686,17 +1753,57 @@ void leetcode_recursive_leafs() {
   }
 }
 
-void basic_digit_manipulation() {}
+void basic_digit_manipulation() {
+  // decimal:
+  int a = 789; // 7*10^2 + 8*10^1 + 9;
+
+  int b = a % 10; // get the last digit
+  int c = a / 10; // pop out the last digit
+
+  // binary representation:
+  int x = 17;     // 1 0001
+  int y = x & 1;  // get the last digit
+  int z = x >> 1; // pop out the last digit
+}
 
 int revertInteger(int num) {
-  // TBD
-  return -1;
+  /*
+  // 10^4 ....
+  // 4...
+
+  int size = (int)log10(num)+1;
+  int temp =0; //result
+  for(int i=0;i<size;i++){
+    //get the last digit => %10
+    //put the digit to tht right position in "temp" => digit * pow(10, size-1-i)
+    //digit /10
+  }
+  */
+
+  // HW0921
+
+  return -1; // TBD
 }
 
 void leetcode_revert_integer() {
   int num = 12345;
   num = revertInteger(num);
   printf("reverted number = %d (ans : 54321)\n", num);
+}
+
+int reverseInt(int word) {
+  // HW0921
+  return -1; // TBDF
+}
+
+void leetcode_bits_resersal() {
+  // Q: reverse the 32-bit positive integer
+  //  For example : integer 20
+  //    0000 0000 0000 0000 0000 0000 0001 0100
+  //  after reversing the 20
+  //    0010 1000 0000 0000 0000 0000 0000 0000
+  int word = 20;
+  word = reverseInt(word);
 }
 
 int funcEvenOddDiff(int x) {
