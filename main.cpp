@@ -1372,10 +1372,39 @@ STreeNode *createDFPostOrderRec(vector<STreeNode> &nodes, int maxDepthNo,
   return root;
 }
 
-STreeNode* createDFPostOrderRec(vector<STreeNode> &nodes, int startIdx, int endIdx)
-{
-  //HW0913
-  return nullptr;
+STreeNode *createDFPostOrderRec(vector<STreeNode> &nodes, int startIdx,
+                                int endIdx) {
+  // f(x) = f(x->left | 50% remaining nodes) + f(x->right | 50%remaining nodes)
+  // + {root}
+  //           (0)   (1) (2)                      (3)    (4) (5)    <== left
+  //           right  root
+  // HW0913
+  STreeNode *root = nullptr;
+
+  // exception
+  if (startIdx == endIdx) // only 1 node
+  {
+    return &(nodes[startIdx]);
+  }
+
+  if (startIdx + 1 == endIdx) // only 2 nodes
+  {
+    root = &(nodes[startIdx]);
+    root->right = &(nodes[endIdx]); // endIdx-node could be either left or right
+    return root;
+  }
+
+  // general
+  int rootIdx = endIdx;
+  root = &(nodes[rootIdx]);
+  int len = endIdx;
+
+  root->right =
+      createDFPostOrderRec(nodes, startIdx + 1 + (len / 2), endIdx - 1);
+  root->left =
+      createDFPostOrderRec(nodes, startIdx, startIdx + 1 + (len / 2) - 1);
+
+  return root;
 }
 
 STreeNode *createDFTree_PostOrder(vector<STreeNode> &nodes) {
@@ -1388,7 +1417,7 @@ STreeNode *createDFTree_PostOrder(vector<STreeNode> &nodes) {
   int impltID = IMPLT_DIV_N_CONQ;
   if (impltID == IMPLT_DIV_N_CONQ) {
     int startIdx = 0;
-    int endIdx = nodes.size()-1;
+    int endIdx = nodes.size() - 1;
     root = createDFPostOrderRec(nodes, startIdx, endIdx);
 
   } else if (impltID == IMPLT_DATAIDX) {
