@@ -16,7 +16,7 @@ using namespace std;
 
 int main(int argc, char **argv) {
 
-  int testID = 32;
+  int testID = 31;
   if (argc < 2)
     printf("default testID : %d\n\n", testID);
   else
@@ -1622,7 +1622,27 @@ void basic_binaryTree_traversal() {
 }
 
 void getInOrderBinaryTreeBalanced(STreeNode *tree) {
-  // HW0921
+
+  // HW0926 : don't call existing function.
+  if (!tree)
+    return;
+
+  /* // HW0921
+  vector<int> vals = traverseBTPreOrder(tree);
+
+  STreeNode *root = nullptr;
+  vector<STreeNode> nodes;
+  for (auto &ir : vals) {
+      printf("%d ", ir);
+      nodes.push_back(STreeNode(ir));
+  }
+  // root = createBFTree(nodes);
+  printf("\n");
+  int startIdx = 0;
+  int endIdx = nodes.size() - 1;
+
+  root = createDFInOrderRec(nodes, startIdx, endIdx);
+  */
 }
 void leetcode_balanced_tree() {
   vector<STreeNode> nodeData(6);
@@ -1671,9 +1691,58 @@ public:
 
 class CRecurLeaf : public CRecurLeafBase {
 public:
+  //             7
+  //            / \
+//           9   1
+  //          / \    \
+//         5   4   2
+  //             /
+  //            6
+  //
+  // Q:  Given binary tree, print out the leave values at different layers
+  //   Examples: {5, 6, 2} {4, 1} {9}, {7}
+  void dfs(STreeNode *root, vector<int> &result, int &count) {
+    if (root == nullptr) {
+      return;
+    }
+    // if (result.size() < depth){
+    //     result.push_back({root->val});
+    // }
+
+    if (!root->left && !root->right) {
+      result.push_back(root->val);
+      count++;
+    } else {
+      dfs(root->left, result, count);
+      if (count > 0) {
+        // printf("%d",root->left->val);
+        root->left = nullptr;
+        count--;
+      }
+
+      dfs(root->right, result, count);
+      if (count > 0) {
+        // printf("%d",root->right->val);
+        root->right = nullptr;
+        count--;
+      }
+    }
+  }
   vector<vector<int>> getLayeredLeaveValues(STreeNode *tree) {
     // HW0921
-    return vector<vector<int>>(0); // To be modified
+    // return vector<vector<int>>(0); // To be modified
+    vector<vector<int>> res;
+
+    int count = 0;
+    while (tree->right != nullptr && tree->left != nullptr) {
+      vector<int> temp(0);
+      dfs(tree, temp, count);
+      // printf("\n");
+      res.push_back(temp);
+    }
+    res.push_back({tree->val});
+
+    return res;
   }
 };
 
@@ -1723,6 +1792,7 @@ void leetcode_recursive_leafs() {
   //             /
   //            6
   //
+
   printNodes(nodeData);
 
   //---------------//
@@ -1781,8 +1851,14 @@ int revertInteger(int num) {
   */
 
   // HW0921
-
-  return -1; // TBD
+  int temp = 0;
+  int res = 0;
+  while (num != 0) {
+    temp = num % 10;
+    res = res * 10 + temp;
+    num = num / 10;
+  }
+  return res; // TBD
 }
 
 void leetcode_revert_integer() {
@@ -1793,7 +1869,17 @@ void leetcode_revert_integer() {
 
 int reverseInt(int word) {
   // HW0921
-  return -1; // TBDF
+  int temp = 0;
+  int res = 0;
+  for (int i = 0; i < 32; i++) {
+    res = res << 1;
+    temp = word & 1;
+    res = res + temp;
+    word = word >> 1;
+    printf("%d\n", res);
+  }
+  return res;
+  // return -1; // TBDF
 }
 
 void leetcode_bits_resersal() {
@@ -1807,7 +1893,7 @@ void leetcode_bits_resersal() {
 }
 
 int funcEvenOddDiff(int x) {
-  // TBD
+  // HW0926
   return -1;
 }
 void leetcode_even_odd_diff() {
@@ -1822,7 +1908,86 @@ void leetcode_even_odd_diff() {
   printf("diff =%d (ans : 1)\n", diff);
 }
 
-void basic_heapify() {}
+void heapifyMaxHeap(vector<int> &vecData, int rootIdx) {
+  // purpose : make sure vecData[rootIdx] >= child value
+
+  int maxIdx = rootIdx;
+  // compare with left
+  int childIdx = 2 * rootIdx + 1;
+  if (childIdx < vecData.size()) {
+    if (vecData[childIdx] > vecData[maxIdx]) {
+      maxIdx = childIdx;
+    }
+  }
+
+  // compare with right
+  childIdx = 2 * rootIdx + 2;
+  if (childIdx < vecData.size()) {
+    if (vecData[childIdx] > vecData[maxIdx]) {
+      maxIdx = childIdx;
+    }
+  }
+  // if maxIdx ! = rootIdx
+  if(maxIdx != rootIdx){
+    //swap root and child
+    int tmp = vecData[maxIdx];
+    vecData[maxIdx] = vecData[rootIdx];
+    vecData[rootIdx] = tmp;
+
+    heapifyMaxHeap(vecData, maxIdx);
+    
+  }
+}
+
+void buildMaxHeap(vector<int> &vecData) {
+  //      5(0)             d = 0  2^0
+  //      /    \
+  //    4(1)    1(2)       d = 1  2^0 + 2^1
+  //   /   \      /   \
+  //  9(3)  2(4)  3(5)      d = 2  2^0 + 2^1 + 2^2
+
+  int maxDepthNo = (int)log2((double)vecData.size());
+
+  int maxTestNodes = 0;
+  // O(logN)
+  for (int d = 0; d <= maxDepthNo - 1; d++) {
+
+    // pow(2, d)
+    int num = 1;
+    for (int n = 0; n < d; d++)
+      num *= 2;
+
+    maxTestNodes += num;
+  }
+  //O(NlogN)
+  for (int i = maxTestNodes - 1; i >= 0; i--)  //N
+  {
+    heapifyMaxHeap(vecData, i); //logN
+  }
+}
+
+void basic_heapify() {
+  vector<int> vecData({5, 4, 1, 9, 2, 3});
+  //      5(0)
+  //      /    \
+  //    4(1)    1(2)
+  //   /   \      /   \
+  //  9(3)  2(4)  3(5)
+
+  printf("== input data ==\n");
+  for (auto &ir : vecData) {
+    printf("%d ", ir);
+  }
+  printf("\n");
+
+  // Def: Max heap:  parent value >= any child value
+
+  //--- build max/min heap  ---//
+  buildMaxHeap(vecData);
+
+  //TBV : heap sort
+}
+
 void basic_heap_sort() {}
 
 int funcFindKthMinFromArray(vector<int> vecData, int k) {
