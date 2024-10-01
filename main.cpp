@@ -16,7 +16,7 @@ using namespace std;
 
 int main(int argc, char **argv) {
 
-  int testID = 31;
+  int testID = 38;
   if (argc < 2)
     printf("default testID : %d\n\n", testID);
   else
@@ -1620,13 +1620,49 @@ void basic_binaryTree_traversal() {
     printf("%d ", ir);
   printf("\n");
 }
+vector<int> tree_to_vec(STreeNode *root){
+  vector<int> temp;
+  if(!root) return temp;
+  temp.push_back(root->val);
+
+  vector<int> childnodes_l = tree_to_vec(root->left);
+  temp.insert(temp.end(),childnodes_l.begin(),childnodes_l.end());
+
+  vector<int> childnodes_r = tree_to_vec(root->right);
+  temp.insert(temp.end(),childnodes_r.begin(),childnodes_r.end());
+  return temp;
+}
+STreeNode *vec_to_inorder(vector<STreeNode>& nodes,int start, int end){
+  // f(x) = f(x->left | 50% remaining nodes) + {root} + f(x->right | 50%
+  // remaining nodes)
+  //           (0)           (1)         (2)      (3)         (4)  (5)    <==
+  //           left root right
+  STreeNode *root = nullptr;
+  if(start == end)return &(nodes[start]);
+  if(start +1 == end) {
+    root = &(nodes[end]);
+    root->left = &(nodes[start]); // must be left
+    return root;
+  }
+
+  int rootidx = start + (end-start+1)/2;
+  root = &(nodes[rootidx]);
+  root->left = vec_to_inorder(nodes,start, rootidx - 1);
+  root->right = vec_to_inorder(nodes,rootidx + 1, end);
+  return root;
+}
 
 void getInOrderBinaryTreeBalanced(STreeNode *tree) {
 
   // HW0926 : don't call existing function.
-  if (!tree)
-    return;
-
+  if (!tree) return;
+    vector<int> res = tree_to_vec(tree);
+    vector<STreeNode> nodes;
+    for(int i:res){
+      nodes.push_back(STreeNode(i));
+    }
+    int n = res.size()-1;
+    STreeNode *root = vec_to_inorder(nodes,0,n);
   /* // HW0921
   vector<int> vals = traverseBTPreOrder(tree);
 
@@ -1894,7 +1930,25 @@ void leetcode_bits_resersal() {
 
 int funcEvenOddDiff(int x) {
   // HW0926
-  return -1;
+  int odd = 0, even = 0, temp = 0;
+
+  int res = 0;
+  int pos = 0;
+  while (x != 0) {
+    if (pos % 2 == 0) {
+      temp = x % 10;
+      odd += temp;
+
+    } else {
+      temp = x % 10;
+      even += temp;
+    }
+    pos++;
+    x = x / 10;
+  }
+  res = abs(even - odd);
+
+  return res; // TBD
 }
 void leetcode_even_odd_diff() {
   int X = 263541;
@@ -1928,14 +1982,13 @@ void heapifyMaxHeap(vector<int> &vecData, int rootIdx) {
     }
   }
   // if maxIdx ! = rootIdx
-  if(maxIdx != rootIdx){
-    //swap root and child
+  if (maxIdx != rootIdx) {
+    // swap root and child
     int tmp = vecData[maxIdx];
     vecData[maxIdx] = vecData[rootIdx];
     vecData[rootIdx] = tmp;
 
     heapifyMaxHeap(vecData, maxIdx);
-    
   }
 }
 
@@ -1959,10 +2012,10 @@ void buildMaxHeap(vector<int> &vecData) {
 
     maxTestNodes += num;
   }
-  //O(NlogN)
-  for (int i = maxTestNodes - 1; i >= 0; i--)  //N
+  // O(NlogN)
+  for (int i = maxTestNodes - 1; i >= 0; i--) // N
   {
-    heapifyMaxHeap(vecData, i); //logN
+    heapifyMaxHeap(vecData, i); // logN
   }
 }
 
@@ -1985,7 +2038,7 @@ void basic_heapify() {
   //--- build max/min heap  ---//
   buildMaxHeap(vecData);
 
-  //TBV : heap sort
+  // TBV : heap sort
 }
 
 void basic_heap_sort() {}
