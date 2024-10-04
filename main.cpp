@@ -16,7 +16,7 @@ using namespace std;
 
 int main(int argc, char **argv) {
 
-  int testID = 41;
+  int testID = 43;
   if (argc < 2)
     printf("default testID : %d\n\n", testID);
   else
@@ -525,11 +525,17 @@ void leetcode_sorting_two_sorted_lists() {
       sec++;
     }
   }
-
   for (auto &ir : listC) {
     printf("%d ", ir);
   }
   printf("\n");
+
+
+
+  
+  
+
+  
 }
 
 bool myPairComp(pair<int, string> &left, pair<int, string> &right) {
@@ -2074,13 +2080,20 @@ void basic_heap_sort() {
   //   heapify again
   //
   buildMaxHeap(vecData);
+
+  printf("max heap: ");
+  for (auto &ir : vecData)
+    printf("%d ", ir);
+  printf("\n");
+
   while (1) {
     // general
-    sortedVec.push_back(vecData.front());
-    for (auto &ir : sortedVec) {
-      printf("%d ", ir);
-    }
-    printf("\n");
+    int tmp = vecData.front();
+    vecData.front() = vecData.back();
+    vecData.back() = tmp;
+
+    // max is the last element in vector
+    sortedVec.push_back(vecData.back());
 
     // ascending: sortedVec.insert(sortedVec.begin(), vecData.begin(),
     // vecData.begin()+1);
@@ -2089,13 +2102,11 @@ void basic_heap_sort() {
     //  For example:  vecData[0]= -1 <==> vecData.front() = -1
     //  vector<int>::iterator <== .begin type
 
-    vecData.erase(vecData.begin());
-    printf("-vecData size = %d\n", (int)vecData.size());
+    vecData.pop_back();
+
     // if(vecData.size() == 0)
     if (vecData.empty())
       break;
-
-    vecData.insert(vecData.begin(), vecData.back());
 
     heapifyMaxHeap(vecData, 0); // O(logN)
 
@@ -2110,7 +2121,6 @@ void basic_heap_sort() {
 }
 void heapifyminHeap(vector<int> &vecData, int rootIdx) {
   // purpose : make sure vecData[rootIdx] <= child value
-  // 每一次都要整串都調整到整個結束?要
   int minIdx = rootIdx;
   // compare with left
   int childidx = 2 * rootIdx + 1;
@@ -2136,6 +2146,41 @@ void heapifyminHeap(vector<int> &vecData, int rootIdx) {
     heapifyminHeap(vecData, minIdx);
   }
 }
+void buildminHeap(vector<int> &vecData) {
+  //      5(0)             d = 0  2^0
+  //      /    \
+  //    4(1)    1(2)       d = 1  2^0 + 2^1
+  //   /   \      /   \
+  //  9(3)  2(4)  3(5)      d = 2  2^0 + 2^1 + 2^2
+
+  int maxDepthNo = (int)log2((double)vecData.size()); // maxDepthNo = 2 ,d=0,d=1
+
+  int maxTestNodes = 0;
+  // O(logN)
+  for (int d = 0; d <= maxDepthNo - 1; d++) {
+
+    // pow(2, d) => pow(2,0)+pow(2,1)
+    int num = 1;
+    for (int n = 0; n < d; n++) {
+      num *= 2;
+    }
+
+    maxTestNodes += num;
+    // maxTestNodes 計算出所有非葉子節點的數量（這些節點需要 heapify 操作）
+  }
+  printf("maxTestNodes = %d\n", maxTestNodes);
+  // O(NlogN)
+  for (int i = maxTestNodes - 1; i >= 0; i--) // N
+  {
+    heapifyminHeap(vecData, i); // logN
+    for (auto &ir : vecData) {
+      printf("%d ", ir);
+    }
+    printf("\n");
+    //所以從點2開始往回測到點0
+  }
+}
+
 int funcFindKthMinFromArray(vector<int> vecData, int k) {
   // build a min heap
   // extract number till K times
@@ -2146,38 +2191,72 @@ int funcFindKthMinFromArray(vector<int> vecData, int k) {
   //    4(1)    1(2)       d = 1  2^0 + 2^1
   //     /   \      /   \
   //  9(3)  2(4)  3(5)      d = 2  2^0 + 2^1 + 2^2
-  int maxDepthNo = (int)log2((double)vecData.size());
-  int maxTestNodes = 0;
 
-  for (int d = 0; d < maxDepthNo; d++) { // maxDepthNo = 2 ,d=0,d=1
-    int num = 1;
-    for (int n = 0; n < d; n++) {
-      num = num * 2;
-    }
-    maxTestNodes = maxTestNodes + num;
-  }
-  // maxTestNodes=3
-  for (int i = 0; i < k; i++) {
-
-    for (int i = maxTestNodes; i >= 0; i--) {
-      heapifyminHeap(vecData, i);
-      for (auto &ir : vecData) {
-        printf("%d ", ir);
-      }
-      printf("\n");
-    }
-    printf("------\n");
-    if (i != k - 1) {
-      int n = vecData.size() - 1;
-      swap(vecData[0], vecData[n]);
-      vecData.pop_back();
-    }
-  }
+  // time complexity : O(NlogN)
+  printf("== input data ==\n");
   for (auto &ir : vecData) {
     printf("%d ", ir);
   }
   printf("\n");
-  return vecData[0];
+
+  vector<int> sortedVec;
+  buildminHeap(vecData); // O(NlogN)
+
+  // O(KlogN)
+  for (int i = 0; i <= k; i++) {
+
+    sortedVec.push_back(vecData.front());
+    for (auto &ir : sortedVec) {
+      printf("%d ", ir);
+    }
+    printf("\n");
+
+    vecData.erase(vecData.begin());
+    printf("-vecData size = %d\n", (int)vecData.size());
+    // if(vecData.size() == 0)
+    if (vecData.empty())
+      break;
+
+    vecData.insert(vecData.begin(), vecData.back());
+    vecData.erase(vecData.end());
+
+    heapifyminHeap(vecData, 0); // O(logN)
+  }
+  return sortedVec[k];
+  //-------------------------------------------------------
+  // int maxDepthNo = (int)log2((double)vecData.size());
+  // int maxTestNodes = 0;
+
+  // for (int d = 0; d < maxDepthNo; d++) { // maxDepthNo = 2 ,d=0,d=1
+  //   int num = 1;
+  //   for (int n = 0; n < d; n++) {
+  //     num = num * 2;
+  //   }
+  //   maxTestNodes = maxTestNodes + num;
+  // }
+  // // maxTestNodes=3
+  // for (int i = 0; i <= k; i++) {
+
+  //   for (int i = maxTestNodes; i >= 0; i--) {
+  //     heapifyminHeap(vecData, i);
+  //     for (auto &ir : vecData) {
+  //       printf("%d ", ir);
+  //     }
+  //     printf("\n");
+  //   }
+  //   printf("------\n");
+  //   if (i != k) {
+  //     int n = vecData.size() - 1;
+  //     swap(vecData[0], vecData[n]);
+  //     vecData.pop_back();
+  //   }
+  // }
+  // for (auto &ir : vecData) {
+  //   printf("%d ", ir);
+  // }
+  // printf("\n");
+  // return vecData[0];
+  //-------------------------------------------------------
 }
 void leetcode_bt_findKthMin() {
   // Given any array/vector, find the K-min number.
@@ -2194,8 +2273,8 @@ void leetcode_bt_findKthMin() {
   printf("%d-min is %d\n\n", k, kthMin);
 }
 
-void pivotPartition(vector<int> &data) {
-  // Step 1: {smaller elements} {pivot} {greater elements}
+int pivotPartition(vector<int> &data, int startIdx, int endIdx) {
+  // Step 1: {smaller elements}  {pivot} {greater elements}
   // Step 2: swap pivot and the last element in "greater elements"
   //{5, 2, 6, 1, 8, 3, 6, 9, 4}
   //                          ^^
@@ -2203,8 +2282,8 @@ void pivotPartition(vector<int> &data) {
   //                  <------| backwardidx, continue if encoutering element >=
   //                  pivot
 
-  int pivotIdx = data.size() - 1;
-  int forwardIdx = 0;
+  int pivotIdx = endIdx;
+  int forwardIdx = startIdx;
   int backwardIdx = pivotIdx - 1;
   while (forwardIdx <= backwardIdx) {
     bool isForwarding = false;
@@ -2238,10 +2317,25 @@ void pivotPartition(vector<int> &data) {
     //  }
   }
 
+  printf("forwardIdx %d\n", forwardIdx);
+  printf("backwardIdx %d\n", backwardIdx);
+
+  printf("after pivot before swap: ");
+  for (auto &ir : data)
+    printf("%d ", ir);
+  printf("\n");
+
   // pivot idx , forward idx
   int tmp = data[forwardIdx];
   data[forwardIdx] = data[pivotIdx];
   data[pivotIdx] = tmp;
+
+  printf("final: ");
+  for (auto &ir : data)
+    printf("%d ", ir);
+  printf("\n");
+
+  return forwardIdx;
 }
 
 void basic_pivot_partitioning() {
@@ -2251,7 +2345,25 @@ void basic_pivot_partitioning() {
   //     2, 3, 1             4      5, 6, 8, 9
   vector<int> vecData({5, 2, 6, 1, 8, 3, 6, 9, 4}); //{1, 2, 3, 4, 5, 6, 8, 9}
 
-  pivotPartition(vecData);
+  pivotPartition(vecData, 0, vecData.size() - 1);
+}
+
+void quickSort(vector<int> &inVec, int startIdx, int endIdx) {
+  // f(x) = f(Y | y < pivot) + {pivot| last element} + f(Z | z >= pivot)
+  // exception
+  if (startIdx >= endIdx)
+    return;
+
+  // general
+
+  // piviot parition
+  int pivotIdx = pivotPartition(inVec, startIdx, endIdx);
+
+  // smaller
+  quickSort(inVec, startIdx, pivotIdx - 1);
+
+  // greater
+  quickSort(inVec, pivotIdx + 1, endIdx);
 }
 
 void basic_quickSort() {
@@ -2262,13 +2374,17 @@ void basic_quickSort() {
   // space complexity : O(N)
   //
   // scenario : limited hardware resource  +  limited data size
-  vector<int> inVec({1, 6, 2, 9, 3, 7, 2, 0, 2, 8, 5});
+  vector<int> inVec({7, 0, 2, 8, 5});
   printf("== unsorted ==\n");
   for (auto &ir : inVec) {
     printf("%d ", ir);
   }
   printf("\n");
-  // TBD
+
+  // f(x) = f(Y | y < pivot) + {pivot| last element} + f(Z | z >= pivot)
+  int startIdx = 0;
+  int endIdx = inVec.size() - 1;
+  quickSort(inVec, startIdx, endIdx);
 
   printf("== sorted ==\n");
   for (auto &ir : inVec) {
@@ -2277,15 +2393,63 @@ void basic_quickSort() {
   printf("\n");
 }
 
+vector<int> mergeSortedList(vector<int> a, vector<int> b){
+  // vector<int> a({1, 5, 7, 9});
+  // vector<int> b({2, 3, 6, 10, 12});
+  vector<int> c; //{1, 2, 3, 5, 6, 7, 9, 10, 12}
+
+  while(!a.empty() || !b.empty()){
+    //select the vector with minimum front() => s
+    vector<int>* s;
+    if(!a.empty() && !b.empty()) s = (a.front() < b.front())?(&a):(&b);
+    else if (!a.empty()) s = &a;
+    else s = &b;
+
+    //push back s.front() to c, s.front() pop out
+    c.push_back(s->front());
+    s->erase(s->begin());    
+  }
+  return c;
+}
+
+vector<int> mergeSort(vector<int> inVec, int startIdx, int endIdx)
+{
+  //f(X0, X1) = f ( f(X00, X01),  f(X10, X11) )
+  vector<int> merged;
+/*
+  //HW1004 
+  
+  //exception
+  if(startIdx == endIdx){
+    
+  }
+  
+  //general
+  //find the middle point, midIdx
+  midIdx = ;
+  leftData = mergeSort(inVec, startIdx, midIdx);
+  rightData = mergeSort(inVec, midIdx+1, endIdx);
+  merged = mergeSortedList(leftData, rightData)
+*/
+  return merged;
+}
+
 void basic_mergeSort() {
   vector<int> inVec({1, 6, 2, 9, 3, 7, 2, 0, 2, 8, 5});
+  // {sorted list}
+  // {sorted list 1}                            {sorted list 2}
+  // {sorted list 1-1} {sorted list 1-2}        {sorted list 2-1} {sorted list 2-2}
+  //....
+  // {1} {6}
   printf("== unsorted ==\n");
   for (auto &ir : inVec) {
     printf("%d ", ir);
   }
   printf("\n");
 
-  // TBD
+  //f(X0, X1) = f ( f(X00, X01),  f(X10, X11) )
+  inVec = mergeSort(inVec, 0, inVec.size() -1);
+  
   printf("== sorted ==\n");
   for (auto &ir : inVec) {
     printf("%d ", ir);
