@@ -16,7 +16,7 @@ using namespace std;
 
 int main(int argc, char **argv) {
 
-  int testID = 43;
+  int testID = 46;
   if (argc < 2)
     printf("default testID : %d\n\n", testID);
   else
@@ -128,6 +128,13 @@ int main(int argc, char **argv) {
     break;
   case 46:
     leetcode_bt_distanceK();
+    break;
+    //------ Experienced-level classes -------//
+  case 47:
+    leetcode_functionParsing();
+    break;
+  case 48:
+    leetcode_permuteData();
     break;
   default:
     printf("not a supproted ID : %d\n", testID);
@@ -529,13 +536,6 @@ void leetcode_sorting_two_sorted_lists() {
     printf("%d ", ir);
   }
   printf("\n");
-
-
-
-  
-  
-
-  
 }
 
 bool myPairComp(pair<int, string> &left, pair<int, string> &right) {
@@ -2393,44 +2393,56 @@ void basic_quickSort() {
   printf("\n");
 }
 
-vector<int> mergeSortedList(vector<int> a, vector<int> b){
+vector<int> mergeSortedList(vector<int> a, vector<int> b) {
   // vector<int> a({1, 5, 7, 9});
   // vector<int> b({2, 3, 6, 10, 12});
   vector<int> c; //{1, 2, 3, 5, 6, 7, 9, 10, 12}
 
-  while(!a.empty() || !b.empty()){
-    //select the vector with minimum front() => s
-    vector<int>* s;
-    if(!a.empty() && !b.empty()) s = (a.front() < b.front())?(&a):(&b);
-    else if (!a.empty()) s = &a;
-    else s = &b;
+  while (!a.empty() || !b.empty()) {
+    // select the vector with minimum front() => s
+    vector<int> *s;
+    if (!a.empty() && !b.empty())
+      s = (a.front() < b.front()) ? (&a) : (&b);
+    else if (!a.empty())
+      s = &a;
+    else
+      s = &b;
 
-    //push back s.front() to c, s.front() pop out
+    // push back s.front() to c, s.front() pop out
     c.push_back(s->front());
-    s->erase(s->begin());    
+    s->erase(s->begin());
   }
   return c;
 }
 
-vector<int> mergeSort(vector<int> inVec, int startIdx, int endIdx)
-{
-  //f(X0, X1) = f ( f(X00, X01),  f(X10, X11) )
+vector<int> mergeSort(vector<int> inVec, int startIdx, int endIdx) {
+  // f(X0, X1) = f ( f(X00, X01),  f(X10, X11) )
   vector<int> merged;
-/*
-  //HW1004 
-  
-  //exception
-  if(startIdx == endIdx){
-    
+
+  // HW1004
+
+  // exception
+  if (startIdx + 1 == endIdx) {
+    vector<int> merged_a;
+    vector<int> merged_b;
+    merged_a.push_back(inVec[startIdx]);
+    merged_b.push_back(inVec[endIdx]);
+    merged = mergeSortedList(merged_a, merged_b);
+
+    return merged;
   }
-  
-  //general
-  //find the middle point, midIdx
-  midIdx = ;
-  leftData = mergeSort(inVec, startIdx, midIdx);
-  rightData = mergeSort(inVec, midIdx+1, endIdx);
-  merged = mergeSortedList(leftData, rightData)
-*/
+  if (startIdx == endIdx) {
+    merged.push_back(inVec[startIdx]);
+    return merged;
+  }
+
+  // general
+  // find the middle point, midIdx
+  int midIdx = (endIdx - startIdx + 1) / 2 + startIdx;
+  vector<int> leftData = mergeSort(inVec, startIdx, midIdx);
+  vector<int> rightData = mergeSort(inVec, midIdx + 1, endIdx);
+  merged = mergeSortedList(leftData, rightData);
+
   return merged;
 }
 
@@ -2438,7 +2450,8 @@ void basic_mergeSort() {
   vector<int> inVec({1, 6, 2, 9, 3, 7, 2, 0, 2, 8, 5});
   // {sorted list}
   // {sorted list 1}                            {sorted list 2}
-  // {sorted list 1-1} {sorted list 1-2}        {sorted list 2-1} {sorted list 2-2}
+  // {sorted list 1-1} {sorted list 1-2}        {sorted list 2-1} {sorted list
+  // 2-2}
   //....
   // {1} {6}
   printf("== unsorted ==\n");
@@ -2447,9 +2460,9 @@ void basic_mergeSort() {
   }
   printf("\n");
 
-  //f(X0, X1) = f ( f(X00, X01),  f(X10, X11) )
-  inVec = mergeSort(inVec, 0, inVec.size() -1);
-  
+  // f(X0, X1) = f ( f(X00, X01),  f(X10, X11) )
+  inVec = mergeSort(inVec, 0, inVec.size() - 1);
+
   printf("== sorted ==\n");
   for (auto &ir : inVec) {
     printf("%d ", ir);
@@ -2459,4 +2472,163 @@ void basic_mergeSort() {
   // Comparisons TBD
 }
 
-void leetcode_bt_distanceK() {}
+class CSolDistanceKInBTBase {
+public:
+  virtual vector<int> distanceK(STreeNode *root, STreeNode *target, int k) {
+    return vector<int>();
+  }
+};
+
+class CSolDistanceKinBT : public CSolDistanceKInBTBase {
+public:
+  vector<int> distanceK(STreeNode *root, STreeNode *target, int k) {
+    // TBD
+    return vector<int>();
+  }
+};
+
+void leetcode_bt_distanceK() {
+  CSolDistanceKinBT objDerived;
+  CSolDistanceKInBTBase *obj;
+  obj = &objDerived;
+
+  int k;
+  vector<int> kVals;
+
+  STreeNode *root = nullptr;
+  STreeNode *target = nullptr;
+  vector<STreeNode> nodeData;
+  printf("-- case 0 --\n");
+  nodeData.clear();
+  nodeData.resize(4);
+  nodeData[0].val = 0;
+  nodeData[1].val = 1;
+  nodeData[2].val = 3;
+  nodeData[3].val = 2;
+  nodeData[0].left = &(nodeData[1]);
+  nodeData[1].left = &(nodeData[2]);
+  nodeData[1].right = &(nodeData[3]);
+  root = &(nodeData[0]);
+  target = &(nodeData[3]);
+
+  printNodes(nodeData);
+
+  //      0
+  //     / \      //
+  //   1
+  //  / \         //
+  //  3  2
+  //     ^ target
+
+  k = 1;
+
+  kVals = obj->distanceK(root, target, k);
+
+  printf("[");
+  for (auto ir : kVals) {
+    printf("%d ", ir);
+  }
+  printf("] => ans: [1]\n");
+
+  printf("-- case 1 --\n");
+  nodeData.clear();
+  nodeData.resize(7);
+  nodeData[0].val = 7;
+  nodeData[0].left = &(nodeData[1]);
+  nodeData[0].right = &(nodeData[2]);
+  nodeData[1].val = 9;
+  nodeData[1].left = &(nodeData[3]);
+  nodeData[1].right = &(nodeData[4]);
+  nodeData[2].val = 1;
+  nodeData[2].right = &(nodeData[6]);
+  nodeData[3].val = 5;
+  nodeData[4].val = 4;
+  nodeData[4].left = &(nodeData[5]);
+  nodeData[5].val = 6;
+  nodeData[6].val = 2;
+  //              7 (0)
+  //            /      \
+  //           9 (1)    1 (2)
+  //          / \         /  \
+  //       5(3)  4 (4)  null   2(6)
+  //             /
+  //            6 (5)
+  printNodes(nodeData);
+
+  root = &(nodeData[0]);
+  target = &(nodeData[1]);
+  k = 2;
+
+  kVals = obj->distanceK(root, target, k);
+
+  printf("[");
+  for (auto ir : kVals) {
+    printf("%d ", ir);
+  }
+  printf("] => ans: [7 4 1]\n");
+}
+
+class CFuncParsingBase {
+public:
+  virtual int solveFunctions(string paramStr) { return -1; }
+};
+
+class CFuncParsing : public CFuncParsingBase {
+public:
+  int solveFunctions(string paramStr) {
+    // TBD
+    return -1;
+  }
+};
+
+void leetcode_functionParsing() {
+  // 𝑓(𝑥) = 2𝑥 – 3
+  // 𝑔(𝑥, 𝑦) = 2𝑥 + 𝑦 – 7
+  // ℎ(𝑥, 𝑦, 𝑧) = 3𝑥 – 2𝑦 + 𝑧
+
+  //
+  //
+  // input string = {h f 5 g 3 4 3}, "space" is inserted between two consecutive
+  // parameters, ℎ(𝑓(5), 𝑔(3, 4), 3) = ℎ(7, 3, 3) = 18
+  //
+  //
+
+  CFuncParsingBase *sol = nullptr;
+  CFuncParsing solDerived;
+
+  sol = &solDerived;
+  string inStr = "h f 5 g 3 4 3";
+  int res = sol->solveFunctions(inStr);
+  printf("%d (ans = 18)\n", res);
+}
+
+class CSolPermuteBase {
+public:
+  virtual int permute(vector<int> &nums) {
+    printf("need implementation\n");
+    return -1;
+  }
+};
+
+class CSolPermute: public CSolPermuteBase {
+public:
+  int permute(vector<int> &nums) {
+    //TBD
+    return -1;
+  }
+};
+
+
+
+
+void leetcode_permuteData() {
+  // https://leetcode.com/problems/permutations/description/
+
+  CSolPermute obj;
+  CSolPermuteBase* sol = &obj; 
+
+  vector<int> in({1, 2, 3});
+
+  int num = sol->permute(in);
+  printf("num = %d (ans: 6)", num);
+}
