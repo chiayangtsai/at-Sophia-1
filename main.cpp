@@ -16,7 +16,7 @@ using namespace std;
 
 int main(int argc, char **argv) {
 
-  int testID = 46;
+  int testID = 47;
   if (argc < 2)
     printf("default testID : %d\n\n", testID);
   else
@@ -74,6 +74,7 @@ int main(int argc, char **argv) {
   case 18: // recursive :
     leetcode_power_of_two();
     break;
+
   case 20: // recursive :
     leetcode_find_leafs();
     break;
@@ -129,11 +130,14 @@ int main(int argc, char **argv) {
   case 46:
     leetcode_bt_distanceK();
     break;
-    //------ Experienced-level classes -------//
   case 47:
+    basic_class_usage();
+    break;
+    //------ Experienced-level classes -------//
+  case 100:
     leetcode_functionParsing();
     break;
-  case 48:
+  case 101:
     leetcode_permuteData();
     break;
   default:
@@ -2422,6 +2426,7 @@ vector<int> mergeSort(vector<int> inVec, int startIdx, int endIdx) {
   // HW1004
 
   // exception
+#if 0
   if (startIdx + 1 == endIdx) {
     vector<int> merged_a;
     vector<int> merged_b;
@@ -2431,14 +2436,21 @@ vector<int> mergeSort(vector<int> inVec, int startIdx, int endIdx) {
 
     return merged;
   }
+  if (startIdx = endIdx)
+  {
+    merged.push_back(inVec[startIdx]);
+    return merged;
+  }
+#else
   if (startIdx == endIdx) {
     merged.push_back(inVec[startIdx]);
     return merged;
   }
+#endif
 
   // general
   // find the middle point, midIdx
-  int midIdx = (endIdx - startIdx + 1) / 2 + startIdx;
+  int midIdx = (endIdx - startIdx + 1) / 2 + startIdx - 1;
   vector<int> leftData = mergeSort(inVec, startIdx, midIdx);
   vector<int> rightData = mergeSort(inVec, midIdx + 1, endIdx);
   merged = mergeSortedList(leftData, rightData);
@@ -2469,7 +2481,76 @@ void basic_mergeSort() {
   }
   printf("\n");
 
-  // Comparisons TBD
+  //                 Quick sort        Merge sort
+  // compleixty      O(NlogN)          O(NlogN)
+  // worse-case      O(N^2)            O(NlogN)
+  // memory          in-place (less)   not-in-place (more)
+  // Use case        small-array       large-array
+  //                 hardware          software general case
+}
+
+class CVehicle {
+public:
+  CVehicle() { type = "Vehicle"; }
+  virtual void getGasFee() {
+    printf("%s: gas fee = %d\n", type.c_str(), price);
+  }
+  virtual int getNumTires() { return 0; }
+
+  // private:
+protected: // considered as "private" within "family"
+  string type;
+  int price;
+};
+
+class CBus : public CVehicle {
+public:
+  CBus() {
+    type = "Bus";
+    price = 500;
+  }
+  void getGasFee() { printf("%s: gas fee = %d\n", type.c_str(), price); }
+  int getNumTires() { return 6; }
+};
+
+class CSportCar : public CVehicle {
+public:
+  CSportCar() {
+    type = "SportCar";
+    price = 300;
+  }
+  void getGasFee() { printf("%s: gas fee = %d\n", type.c_str(), price); }
+  int getNumTires() { return 4; }
+};
+
+void basic_class_usage() {
+  // inheritance
+  // {
+  //   CBus *myBus = new CBus;
+  //   myBus->getGasFee();
+  //   printf("num tires : %d\n", myBus->getNumTires());
+
+  //   CSportCar *mySportCar = new CSportCar;
+  //   mySportCar->getGasFee();
+  //   printf("num tires : %d\n", mySportCar->getNumTires());
+
+  //   delete myBus;
+  //   delete mySportCar;
+  // }
+
+  // polynomial : 多型 / 多態
+  CBus objBus;
+  CSportCar objSportCar;
+
+  CVehicle *obj;
+  obj = &objBus;
+
+  obj->getGasFee();
+  printf("num tires : %d\n", obj->getNumTires());
+
+  obj = &objSportCar;
+  obj->getGasFee();
+  printf("num tires : %d\n", obj->getNumTires());
 }
 
 class CSolDistanceKInBTBase {
@@ -2481,6 +2562,61 @@ public:
 
 class CSolDistanceKinBT : public CSolDistanceKInBTBase {
 public:
+  void helper(STreeNode *node, STreeNode *target, vector<int> &out, int res,
+              int k) {
+    if (!node)
+      return;
+    if (!target)
+      return;
+    // out.push_back(node);
+    if (res == k && node != target) {
+      res = 0;
+      out.push_back(target->val);
+      return;
+    }
+    res++;
+    helper(node, target->right, out, res, k);
+    helper(node, target->left, out, res, k);
+    // out.pop_back();
+  }
+  bool dp(STreeNode *node, STreeNode *target, vector<int> &pre) {
+    if (!node)
+      return false;
+    pre.push_back(node->val);
+
+    if (node == target) {
+      pre.pop_back();
+      return true;
+    }
+
+    bool left_num = dp(node->left, target, pre);
+    if (left_num)
+      return true;
+
+    bool right_num = dp(node->right, target, pre);
+    if (right_num)
+      return true;
+
+    return (left_num || right_num);
+  }
+  vector<int> distanceK(STreeNode *root, STreeNode *target, int k) {
+    vector<int> out, vec_pre, out2;
+    int res = 0;
+    helper(root, target, out, res, k);
+    dp(root, target, vec_pre);
+    int count = vec_pre.size();
+    if (count < k) {
+      res = 0;
+      helper(root, root, out2, res, k - count);
+    }
+    out.insert(out.end(), out2.begin(), out2.end());
+
+    return out;
+  }
+};
+
+class CSolDistanceKinBTVK : public CSolDistanceKInBTBase {
+public:
   vector<int> distanceK(STreeNode *root, STreeNode *target, int k) {
     // TBD
     return vector<int>();
@@ -2488,9 +2624,24 @@ public:
 };
 
 void leetcode_bt_distanceK() {
+
+  // HW1010
+
   CSolDistanceKinBT objDerived;
+  CSolDistanceKinBTVK objVK;
   CSolDistanceKInBTBase *obj;
-  obj = &objDerived;
+
+  enum _IMPLT_ID {
+    IMPLT_SOPHIA = 0,
+    IMPLT_VK,
+  };
+
+  int impltID = IMPLT_SOPHIA;
+  if (impltID == IMPLT_SOPHIA) {
+    obj = &objDerived;
+  } else {
+    obj = &objVK;
+  }
 
   int k;
   vector<int> kVals;
@@ -2565,7 +2716,7 @@ void leetcode_bt_distanceK() {
   for (auto ir : kVals) {
     printf("%d ", ir);
   }
-  printf("] => ans: [7 4 1]\n");
+  printf("] => ans: [6 1]\n");
 }
 
 class CFuncParsingBase {
@@ -2576,7 +2727,7 @@ public:
 class CFuncParsing : public CFuncParsingBase {
 public:
   int solveFunctions(string paramStr) {
-    // TBD
+    //HW1010
     return -1;
   }
 };
@@ -2610,22 +2761,19 @@ public:
   }
 };
 
-class CSolPermute: public CSolPermuteBase {
+class CSolPermute : public CSolPermuteBase {
 public:
   int permute(vector<int> &nums) {
-    //TBD
+    // TBD
     return -1;
   }
 };
-
-
-
 
 void leetcode_permuteData() {
   // https://leetcode.com/problems/permutations/description/
 
   CSolPermute obj;
-  CSolPermuteBase* sol = &obj; 
+  CSolPermuteBase *sol = &obj;
 
   vector<int> in({1, 2, 3});
 

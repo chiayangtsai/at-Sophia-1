@@ -36,6 +36,8 @@ void basic_mergeSort();
 void leetcode_bt_distanceK();
 void leetcode_bits_resersal();
 void basic_pivot_partitioning();
+void basic_class_usage();
+
 
 // experienced-level
 void leetcode_functionParsing();
