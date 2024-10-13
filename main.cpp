@@ -16,7 +16,7 @@ using namespace std;
 
 int main(int argc, char **argv) {
 
-  int testID = 47;
+  int testID = 100;
   if (argc < 2)
     printf("default testID : %d\n\n", testID);
   else
@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
   // experienced-level
   //  linked list / Hash table / string
   //  ordering conflict
-  //  dynamic programming
+  //  dynamic programming - targetsum
   //  miscs - FSM (hardware)
   //  graph theory (optional)
 }
@@ -2562,56 +2562,61 @@ public:
 
 class CSolDistanceKinBT : public CSolDistanceKInBTBase {
 public:
-  void helper(STreeNode *node, STreeNode *target, vector<int> &out, int res,
-              int k) {
-    if (!node)
-      return;
-    if (!target)
-      return;
-    // out.push_back(node);
-    if (res == k && node != target) {
-      res = 0;
-      out.push_back(target->val);
-      return;
-    }
-    res++;
-    helper(node, target->right, out, res, k);
-    helper(node, target->left, out, res, k);
-    // out.pop_back();
-  }
-  bool dp(STreeNode *node, STreeNode *target, vector<int> &pre) {
+  bool downnode(STreeNode *node, STreeNode *target, vector<int> &out) {
     if (!node)
       return false;
-    pre.push_back(node->val);
 
-    if (node == target) {
-      pre.pop_back();
+    out.push_back(node->val);
+    if (node->val == target->val) {
+      out.pop_back();
       return true;
     }
 
-    bool left_num = dp(node->left, target, pre);
-    if (left_num)
-      return true;
+    bool right_judge = downnode(node->right, target, out);
+    if (!right_judge && out.size() > 1) {
+      out.pop_back();
+      return false;
+    }
+    bool left_judge = downnode(node->left, target, out);
+    if (!left_judge && out.size() > 1) {
+      out.pop_back();
+      return false;
+    }
+    return true;
+  }
 
-    bool right_num = dp(node->right, target, pre);
-    if (right_num)
-      return true;
+  void dp(STreeNode *root, vector<int> &out, int k) {
+    if (!root)
+      return;
 
-    return (left_num || right_num);
+    if (k == 0) {
+      out.push_back(root->val);
+      return;
+    }
+
+    dp(root->right, out, k - 1);
+    dp(root->left, out, k - 1);
   }
   vector<int> distanceK(STreeNode *root, STreeNode *target, int k) {
-    vector<int> out, vec_pre, out2;
-    int res = 0;
-    helper(root, target, out, res, k);
-    dp(root, target, vec_pre);
-    int count = vec_pre.size();
-    if (count < k) {
-      res = 0;
-      helper(root, root, out2, res, k - count);
-    }
-    out.insert(out.end(), out2.begin(), out2.end());
+    // 1.把整條root->target的路徑都寫入out內->downnode
+    // 2.1找到target再往下找k
+    // 2.2沿著剛剛out往上找k 碰到root為止 再從root往另一條路找k-size()
 
-    return out;
+    vector<int> down{root->val};
+    vector<int> res;
+    bool right_res = downnode(root->right, target, down);
+    bool left_res = downnode(root->left, target, down);
+    if (right_res) {
+      dp(target, res, k);
+      int temp = k - down.size() - 1;
+      dp(root->left, res, temp);
+    }
+    if (left_res) {
+      dp(target, res, k);
+      int temp = k - down.size() - 1;
+      dp(root->right, res, temp);
+    }
+    return res;
   }
 };
 
@@ -2724,11 +2729,180 @@ public:
   virtual int solveFunctions(string paramStr) { return -1; }
 };
 
+class CFuncParsingGreedy : public CFuncParsingBase {
+public:
+  int solveFunctions(string paramStr) {
+    // 𝑓(𝑥) = 2𝑥 – 3
+    // 𝑔(𝑥, 𝑦) = 2𝑥 + 𝑦 – 7
+    // ℎ(𝑥, 𝑦, 𝑧) = 3𝑥 – 2𝑦 + 𝑧
+    // input string = "h f 5 g 3 4 3"
+    vector<string> paramList;
+
+    string oneStr;
+    for (auto &ir : paramStr) {
+      if (ir == ' ') {
+        paramList.push_back(oneStr);
+        oneStr.clear();
+      } else {
+        oneStr.push_back(ir);
+      }
+    }
+    paramList.push_back(oneStr);
+
+    return greedySolvFunc(paramList);
+  }
+
+private:
+  int greedySolvFunc(vector<string> paramList) {
+    int res = -1;
+
+    while (paramList.size() > 1) {
+      auto it = prev(paramList.end());
+      // find "function idenfier"
+      while (isdigit(it->back())) {
+        it--;
+      }
+
+      char f = it->front();
+      // merge parameters
+      if (f == 'f') {
+        // 𝑓(𝑥) = 2𝑥 – 3
+        auto x = it + 1;
+        *it = to_string(2 * stoi(*x) - 3);
+        paramList.erase(x);
+      } else if (f == 'g') {
+        // 𝑔(𝑥, 𝑦) = 2𝑥 + 𝑦 – 7
+        auto x = it + 1;
+        auto y = x + 1;
+        *it = to_string(2 * stoi(*x) + stoi(*y) - 7);
+
+        paramList.erase(y);
+        paramList.erase(x);
+      } else // h
+      {
+        // ℎ(𝑥, 𝑦, 𝑧) = 3𝑥 – 2𝑦 + 𝑧
+        auto x = it + 1;
+        auto y = x + 1;
+        auto z = y + 1;
+
+        *it = to_string(3 * stoi(*x) - 2 * stoi(*y) + stoi(*z));
+        paramList.erase(z);
+        paramList.erase(y);
+        paramList.erase(x);
+      }
+
+      // look backward
+      it--;
+
+      // ending condition
+      //  if(paramList.size()==1)
+      //    break;
+    }
+
+    res = stoi(paramList.front());
+
+    return res;
+  }
+};
+
+class CFuncParsingRecur : public CFuncParsingBase {
+public:
+  int solveFunctions(string paramStr) {
+    // 𝑓(𝑥) = 2𝑥 – 3
+    // 𝑔(𝑥, 𝑦) = 2𝑥 + 𝑦 – 7
+    // ℎ(𝑥, 𝑦, 𝑧) = 3𝑥 – 2𝑦 + 𝑧
+    // input string = "h f 5 g 3 4 3"
+    vector<string> paramList;
+
+    string oneStr;
+    for (auto &ir : paramStr) {
+      if (ir == ' ') {
+        paramList.push_back(oneStr);
+        oneStr.clear();
+      } else {
+        oneStr.push_back(ir);
+      }
+    }
+    paramList.push_back(oneStr);
+
+    return recSolvFunc(paramList);
+  }
+
+private:
+  int recSolvFunc(vector<string> paramList) {
+
+    int res = -1;
+    
+#if 0
+    //HW1013
+    // exception
+    if (isdigit(paramList.front().back())) {
+      int oneParam = stoi(paramList.front());
+      paramList.erase(paramList.begin());
+      return oneParam;
+    }
+
+    // general
+
+    // get the function identifier
+    char f = paramList.front().front();
+    paramList.erase(paramList.begin());
+
+    int num = -1;
+    if (f == 'f') {
+      num = 1;
+    } else
+      (f == 'g') { num = 2; }
+    else // h
+    {
+      num = 3;
+    }
+
+    // -> number of recursive call
+    vector<int> funcParams;
+    for (int i = 0; i < num; i++) {
+      int param = recSolvFunc();
+      funcParams.push_back(param);
+    }
+
+    // apply parameters to function
+    //  input : funcParams
+    //  output : res
+#endif
+    return res;
+  }
+};
+
 class CFuncParsing : public CFuncParsingBase {
 public:
   int solveFunctions(string paramStr) {
-    //HW1010
-    return -1;
+    // HW1010
+    //新建string 把所有f計算後的值 都重新寫入新string
+    //新建string 把所有g計算後的值都重新寫入string
+    string t1, t2;
+    int res = 0;
+    for (int i = 0; i < paramStr.length(); i++) {
+      if (paramStr[i] == 'f') {
+        int temp1 = (paramStr[i + 2] - '0') * 2 - 3;
+        t1.push_back(temp1 + '0');
+        i = i + 3;
+      } else if (paramStr[i] != ' ') {
+        t1.push_back(paramStr[i]);
+      }
+    }
+    for (int i = 0; i < t1.length(); i++) {
+      if (t1[i] == 'g') {
+        int temp1 = (t1[i + 1] - '0') * 2 + (t1[i + 2] - '0') - 7;
+        t2.push_back(temp1 + '0');
+        i = i + 2;
+      } else {
+        t2.push_back(t1[i]);
+      }
+    }
+
+    res = (t2[1] - '0') * 3 - 2 * (t2[2] - '0') + (t2[3] - '0');
+
+    return res;
   }
 };
 
@@ -2744,10 +2918,24 @@ void leetcode_functionParsing() {
   //
   //
 
-  CFuncParsingBase *sol = nullptr;
-  CFuncParsing solDerived;
+  enum _IMPLT_ID {
+    IMPLT_GREEDY = 0,
+    IMPLT_RECURSIVE,
+  };
 
-  sol = &solDerived;
+  CFuncParsingBase *sol = nullptr;
+  CFuncParsingGreedy solGreedy;
+  CFuncParsingRecur solRecur;
+
+  // CFuncParsing solDerived;
+  // sol = &solDerived;
+  int impltID = IMPLT_GREEDY;
+  if (impltID == IMPLT_GREEDY) {
+    sol = &solGreedy;
+  } else {
+    sol = &solRecur;
+  }
+
   string inStr = "h f 5 g 3 4 3";
   int res = sol->solveFunctions(inStr);
   printf("%d (ans = 18)\n", res);
@@ -2764,7 +2952,7 @@ public:
 class CSolPermute : public CSolPermuteBase {
 public:
   int permute(vector<int> &nums) {
-    // TBD
+    //HW1013
     return -1;
   }
 };
@@ -2776,6 +2964,15 @@ void leetcode_permuteData() {
   CSolPermuteBase *sol = &obj;
 
   vector<int> in({1, 2, 3});
+  //f({a, b, c, d, e}) = f( {b, c, d, e} | a)
+  //                   + f( {a, c, d, e} | b)
+  //                   ....
+  //                   + f ( {a, b, c, d} |e)
+  // exception case:  when nothing can be permuted, just return 1;
+  //
+  //
+  //f({1, 1, 2}) => backtracking + memo
+  //                               key : "1-1-2"
 
   int num = sol->permute(in);
   printf("num = %d (ans: 6)", num);
