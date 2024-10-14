@@ -2829,11 +2829,10 @@ public:
   }
 
 private:
-  int recSolvFunc(vector<string> paramList) {
+  int recSolvFunc(vector<string>& paramList) {
 
     int res = -1;
-    
-#if 0
+
     //HW1013
     // exception
     if (isdigit(paramList.front().back())) {
@@ -2851,8 +2850,10 @@ private:
     int num = -1;
     if (f == 'f') {
       num = 1;
-    } else
-      (f == 'g') { num = 2; }
+    } 
+    else if(f == 'g'){
+        num = 2;
+    }
     else // h
     {
       num = 3;
@@ -2861,14 +2862,24 @@ private:
     // -> number of recursive call
     vector<int> funcParams;
     for (int i = 0; i < num; i++) {
-      int param = recSolvFunc();
+      int param = recSolvFunc(paramList);
       funcParams.push_back(param);
     }
 
     // apply parameters to function
     //  input : funcParams
     //  output : res
-#endif
+
+    if(num==1){
+        res = 2*funcParams.front()-3;
+    }
+    else if (num==2){
+        res = 2*funcParams[0]+funcParams[1]-7;
+    }
+    else{
+        res = 3*funcParams[0]-2*funcParams[1]+funcParams[2];
+    }
+
     return res;
   }
 };
