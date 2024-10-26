@@ -16,7 +16,7 @@ using namespace std;
 
 int main(int argc, char **argv) {
 
-  int testID = 100;
+  int testID = 101;
   if (argc < 2)
     printf("default testID : %d\n\n", testID);
   else
@@ -134,11 +134,14 @@ int main(int argc, char **argv) {
     basic_class_usage();
     break;
     //------ Experienced-level classes -------//
-  case 100:
+  case 100: // dynamic programming (DP)
     leetcode_functionParsing();
     break;
-  case 101:
+  case 101: // DP
     leetcode_permuteData();
+    break;
+  case 103: // Linked list, Hash table
+    leetcode_prefix_score();
     break;
   default:
     printf("not a supproted ID : %d\n", testID);
@@ -2829,12 +2832,12 @@ public:
   }
 
 private:
-  int recSolvFunc(vector<string>& paramList) {
+  int recSolvFunc(vector<string> &paramList) {
 
     int res = -1;
 
-    //HW1013
-    // exception
+    // HW1013
+    //  exception
     if (isdigit(paramList.front().back())) {
       int oneParam = stoi(paramList.front());
       paramList.erase(paramList.begin());
@@ -2850,11 +2853,9 @@ private:
     int num = -1;
     if (f == 'f') {
       num = 1;
-    } 
-    else if(f == 'g'){
-        num = 2;
-    }
-    else // h
+    } else if (f == 'g') {
+      num = 2;
+    } else // h
     {
       num = 3;
     }
@@ -2870,14 +2871,12 @@ private:
     //  input : funcParams
     //  output : res
 
-    if(num==1){
-        res = 2*funcParams.front()-3;
-    }
-    else if (num==2){
-        res = 2*funcParams[0]+funcParams[1]-7;
-    }
-    else{
-        res = 3*funcParams[0]-2*funcParams[1]+funcParams[2];
+    if (num == 1) {
+      res = 2 * funcParams.front() - 3;
+    } else if (num == 2) {
+      res = 2 * funcParams[0] + funcParams[1] - 7;
+    } else {
+      res = 3 * funcParams[0] - 2 * funcParams[1] + funcParams[2];
     }
 
     return res;
@@ -2962,9 +2961,66 @@ public:
 
 class CSolPermute : public CSolPermuteBase {
 public:
+  void dp(vector<int> nums, vector<int> end_vec, int &res,
+          unordered_map<string, int> &inMap) {
+    //變動 固定 現在第幾個
+    string st;
+    if (nums.size() == 1) {
+      for (auto i : end_vec) {
+
+        st = st + to_string(i);
+        st = st + '-';
+      }
+
+      st = st + to_string(nums.front());
+      if (!inMap.count(st)) {
+        res = res + 1;
+        inMap[st] = res;
+      }
+      return;
+    }
+    // if剩最後2個要回傳vector 給前面的寫map
+
+    for (int i = 0; i < nums.size(); ++i) {
+      vector<int> temp = nums;
+      end_vec.push_back(temp[i]); //固定的最後數寫入vector
+      if (nums.size() > 1) {
+        temp.erase(temp.begin() + i);
+      }
+
+      dp(temp, end_vec, res, inMap); //組合都寫入unordermap
+      end_vec.pop_back();
+    }
+  }
+
+  void rec(vector<int> &path, vector<int> &vis, int &res, vector<int> &nums) {
+    if (path.size() == nums.size()) {
+      res++;
+      return;
+    }
+
+    for (int i = 0; i < nums.size(); i++) {
+      if (!vis[i]) {
+        vis[i] = 1;
+        path.push_back(nums[i]);
+        rec(path, vis, res, nums);
+        vis[i] = 0;
+        path.pop_back();
+      }
+    }
+  }
+
   int permute(vector<int> &nums) {
-    //HW1013
-    return -1;
+    // HW1013
+    int res = 0;
+    // vector<int> temp;
+    // unordered_map<string, int> inMap;
+    // dp(nums,temp,res,inMap);
+    vector<int> path;
+    vector<int> vis(nums.size());
+    rec(path, vis, res, nums);
+
+    return res;
   }
 };
 
@@ -2974,17 +3030,129 @@ void leetcode_permuteData() {
   CSolPermute obj;
   CSolPermuteBase *sol = &obj;
 
-  vector<int> in({1, 2, 3});
-  //f({a, b, c, d, e}) = f( {b, c, d, e} | a)
-  //                   + f( {a, c, d, e} | b)
-  //                   ....
-  //                   + f ( {a, b, c, d} |e)
-  // exception case:  when nothing can be permuted, just return 1;
+  vector<int> in;
+  // f({a, b, c, d, e}) = f( {b, c, d, e} | a)
+  //                    + f( {a, c, d, e} | b)
+  //                    ....
+  //                    + f ( {a, b, c, d} |e)
+  //  exception case:  when nothing can be permuted, just return 1;
   //
   //
-  //f({1, 1, 2}) => backtracking + memo
-  //                               key : "1-1-2"
+  // f({1, 1, 2}) => backtracking + memo
+  //                                key : "1-1-2"
 
-  int num = sol->permute(in);
-  printf("num = %d (ans: 6)", num);
+  in = {1, 2, 3};
+  printf("num = %d (ans: 6)\n", sol->permute(in));
+
+  in = {1, 1, 2, 3};
+  printf("num = %d (ans: 12)\n", sol->permute(in));
+
+  in = {1, 1, 2, 2, 3, 3};
+  printf("num = %d (ans: 90)\n", sol->permute(in));
+}
+
+class CPrefixScoreBase {
+public:
+  virtual vector<int> sumPrefixScores(vector<string> &words) {
+    vector<int> scores;
+    printf("need a implementation");
+    return scores;
+  }
+};
+
+class CPrefixScore : public CPrefixScoreBase {
+public:
+  vector<int> sumPrefixScores(vector<string> &words) {
+    vector<int> scores;
+    // TBD
+    return scores;
+  }
+};
+
+void leetcode_prefix_score() {
+  /*
+
+  https://leetcode.com/problems/sum-of-prefix-scores-of-strings/description/
+
+  You are given an array words of size n consisting of non-empty strings.
+
+  We define the score of a string word as the number of strings words[i]
+  such that word is a prefix of words[i].
+
+  For example, if words = ["a", "ab", "abc", "cab"],
+  then the score of "ab" is 2, since "ab" is a prefix of both "ab" and "abc".
+  Return an array answer of size n
+  where answer[i] is the sum of scores of every non-empty prefix of words[i].
+
+  Note that a string is considered as a prefix of itself.
+
+
+  Example 1:
+
+  Input: words = ["abc","ab","bc","b"]
+  Output: [5,4,3,2]
+  Explanation: The answer for each string is the following:
+
+  - "abc" has 3 prefixes: "a", "ab", and "abc".
+  - There are 2 strings with the prefix "a", 2 strings with the prefix "ab",
+  and 1 string with the prefix "abc".
+  The total is answer[0] = 2 + 2 + 1 = 5.
+
+  - "ab" has 2 prefixes: "a" and "ab".
+  - There are 2 strings with the prefix "a", and 2 strings with the prefix "ab".
+  The total is answer[1] = 2 + 2 = 4.
+
+  - "bc" has 2 prefixes: "b" and "bc".
+  - There are 2 strings with the prefix "b", and 1 string with the prefix "bc".
+  The total is answer[2] = 2 + 1 = 3.
+
+  - "b" has 1 prefix: "b".
+  - There are 2 strings with the prefix "b".
+  The total is answer[3] = 2.
+
+  Example 2:
+
+  Input: words = ["abcd"]
+  Output: [4]
+  Explanation:
+  "abcd" has 4 prefixes: "a", "ab", "abc", and "abcd".
+  Each prefix has a score of one, so the total is answer[0] = 1 + 1 + 1 + 1 = 4.
+
+
+  Constraints:
+
+  1 <= words.length <= 1000
+  1 <= words[i].length <= 1000
+  words[i] consists of lowercase English letters.
+  */
+
+  CPrefixScore objDerived;
+  CPrefixScoreBase *obj = nullptr;
+
+  enum IMPLT_ID_ {
+    IMPLT_DERIVED = 0,
+  };
+
+  int impltID = IMPLT_DERIVED;
+
+  if (impltID == IMPLT_DERIVED) {
+    obj = &objDerived;
+  } else {
+    printf("not a supported implementation\n");
+    exit(-1);
+  }
+
+  vector<int> scores;
+
+  vector<string> words;
+  words.push_back("abc");
+  words.push_back("ab");
+  words.push_back("bc");
+  words.push_back("b");
+
+  scores = obj->sumPrefixScores(words);
+  for (auto &ir : scores)
+    printf("%d, ", ir);
+  printf("\n");
+  printf("ans : 5, 4, 3, 2\n");
 }
