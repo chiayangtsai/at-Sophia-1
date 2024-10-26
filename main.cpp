@@ -3,9 +3,12 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <map>
+#include <sstream>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 // google cplusplus.com
@@ -2871,6 +2874,7 @@ private:
     //  input : funcParams
     //  output : res
 
+    // HW1026 use "function" instead of "number of parameters"
     if (num == 1) {
       res = 2 * funcParams.front() - 3;
     } else if (num == 2) {
@@ -3013,41 +3017,135 @@ public:
   int permute(vector<int> &nums) {
     // HW1013
     int res = 0;
-    // vector<int> temp;
-    // unordered_map<string, int> inMap;
-    // dp(nums,temp,res,inMap);
-    vector<int> path;
-    vector<int> vis(nums.size());
-    rec(path, vis, res, nums);
+    vector<int> temp;
+    unordered_map<string, int> inMap;
+    dp(nums, temp, res, inMap);
+    // vector<int> path;
+    // vector<int> vis(nums.size());
+    // rec(path, vis, res, nums);
 
     return res;
   }
+};
+
+#define CONSIDER_REPEATETD 1
+
+class CSolPermuteVK : public CSolPermuteBase {
+public:
+#if CONSIDER_REPEATETD
+  int permute(vector<int> &nums) {
+    permutedRes.clear();
+    return permute(nums, vector<int>(0));
+  }
+
+private:
+  int permute(vector<int> &nums, vector<int> fixed)
+#else
+  int permute(vector<int> &nums)
+#endif
+  {
+    // f({a, b, c, d, e}) = f( {b, c, d, e} | a)
+    //                    + f( {a, c, d, e} | b)
+    //                    ....
+    //                    + f ( {a, b, c, d} |e)
+    //                      ^^^^^^^^^^^^^^^^^^^^
+    //              f({b, c, d} | {a, e} ) +.......
+    //           .. f({} | {e, a, b, c, d})
+
+    //  {a, b, c}  =>   {a, b | c}  ,   {a, c} , {b, c}
+    //                 {a |b} , {b}   {a}  {c}  {b} {c}
+    //                {}     {}    {}    {}  {}   {}
+    //
+
+    int sum = 0;
+    // exception
+    if (nums.empty()) {
+#if CONSIDER_REPEATETD
+      if (permutedRes.find(getHashKey(fixed)) == permutedRes.end()) {
+        permutedRes.insert(getHashKey(fixed));
+        sum = 1;
+      }
+
+      return sum;
+#else
+      return 1;
+#endif
+    }
+
+    // general
+    for (int i = 0; i < nums.size(); i++) {
+      int cached = nums[i];
+      nums.erase(nums.begin() + i);
+#if CONSIDER_REPEATETD
+      fixed.push_back(cached);
+      sum += permute(nums, fixed);
+      fixed.pop_back();
+#else
+      sum += permute(nums);
+#endif
+
+      nums.insert(nums.begin() + i, cached);
+    }
+    return sum;
+  }
+#if CONSIDER_REPEATETD
+private:
+  string getHashKey(vector<int> nums) {
+    stringstream ss;
+    for (int i = 0; i < nums.size(); i++) {
+      ss << nums[i] << "_";
+    }
+    // "1_1_2_3_"
+    return ss.str();
+  }
+
+private:
+  unordered_set<string> permutedRes;
+#endif
 };
 
 void leetcode_permuteData() {
   // https://leetcode.com/problems/permutations/description/
 
   CSolPermute obj;
-  CSolPermuteBase *sol = &obj;
+  CSolPermuteVK objVK;
+
+  enum _IMPLT_ID { IMPLT_SOPHIA = 0, IMPLT_VK };
+
+  CSolPermuteBase *sol;
+
+  int impltID = IMPLT_VK;
+  if (impltID == IMPLT_SOPHIA) {
+    sol = &obj;
+  } else {
+    sol = &objVK;
+  }
 
   vector<int> in;
   // f({a, b, c, d, e}) = f( {b, c, d, e} | a)
   //                    + f( {a, c, d, e} | b)
   //                    ....
   //                    + f ( {a, b, c, d} |e)
+  //                      ^^^^^^^^^^^^^^^^^^^^
+  //              f({b, c, d} | {e, a}) +.......
+  //           .. f({} | {e, a, b, c, d})
   //  exception case:  when nothing can be permuted, just return 1;
   //
   //
   // f({1, 1, 2}) => backtracking + memo
   //                                key : "1-1-2"
 
-  in = {1, 2, 3};
+  // v0: backtracking
+  // v1: (backtracking + repeated case)
+  // v2: (backtracking + repeated case) + memorization //TBV
+
+  in = {1, 2, 3}; // 3!
   printf("num = %d (ans: 6)\n", sol->permute(in));
 
-  in = {1, 1, 2, 3};
+  in = {1, 1, 2, 3}; // 4! / 2!
   printf("num = %d (ans: 12)\n", sol->permute(in));
 
-  in = {1, 1, 2, 2, 3, 3};
+  in = {1, 1, 2, 2, 3, 3}; // 6! / (2! 2! 2!)
   printf("num = %d (ans: 90)\n", sol->permute(in));
 }
 
@@ -3064,7 +3162,7 @@ class CPrefixScore : public CPrefixScoreBase {
 public:
   vector<int> sumPrefixScores(vector<string> &words) {
     vector<int> scores;
-    // TBD
+    //HW1026
     return scores;
   }
 };
