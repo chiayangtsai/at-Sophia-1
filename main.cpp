@@ -19,7 +19,7 @@ using namespace std;
 
 int main(int argc, char **argv) {
 
-  int testID = 101;
+  int testID = 103;
   if (argc < 2)
     printf("default testID : %d\n\n", testID);
   else
@@ -145,6 +145,9 @@ int main(int argc, char **argv) {
     break;
   case 103: // Linked list, Hash table
     leetcode_prefix_score();
+    break;
+  case 104: // ordering conflict
+    // merge interval (TBV)
     break;
   default:
     printf("not a supproted ID : %d\n", testID);
@@ -2875,12 +2878,14 @@ private:
     //  output : res
 
     // HW1026 use "function" instead of "number of parameters"
-    if (num == 1) {
+    if (f == 'f') {
       res = 2 * funcParams.front() - 3;
-    } else if (num == 2) {
+    } else if (f == 'g') {
       res = 2 * funcParams[0] + funcParams[1] - 7;
-    } else {
+    } else if (f == 'h') {
       res = 3 * funcParams[0] - 2 * funcParams[1] + funcParams[2];
+    } else {
+      res = -1;
     }
 
     return res;
@@ -2963,6 +2968,14 @@ public:
   }
 };
 
+class CSolPermuteSophia : public CSolPermuteBase {
+public:
+  int permute(vector<int> &nums) {
+    // TBD
+    return -1;
+  }
+};
+
 class CSolPermute : public CSolPermuteBase {
 public:
   void dp(vector<int> nums, vector<int> end_vec, int &res,
@@ -3029,6 +3042,9 @@ public:
 };
 
 #define CONSIDER_REPEATETD 1
+#if CONSIDER_REPEATETD
+#define PERMUTE_MEMO 1
+#endif
 
 class CSolPermuteVK : public CSolPermuteBase {
 public:
@@ -3060,7 +3076,7 @@ private:
     int sum = 0;
     // exception
     if (nums.empty()) {
-#if CONSIDER_REPEATETD
+#if CONSIDER_REPEATETD && !PERMUTE_MEMO
       if (permutedRes.find(getHashKey(fixed)) == permutedRes.end()) {
         permutedRes.insert(getHashKey(fixed));
         sum = 1;
@@ -3078,7 +3094,16 @@ private:
       nums.erase(nums.begin() + i);
 #if CONSIDER_REPEATETD
       fixed.push_back(cached);
-      sum += permute(nums, fixed);
+
+#if PERMUTE_MEMO
+      string permuteKey = getHashKey(fixed) + getHashKey(nums);
+      if (permutedRes.find(permuteKey) == permutedRes.end()) {
+#endif
+        sum += permute(nums, fixed);
+#if PERMUTE_MEMO
+        permutedRes.insert(permuteKey);
+      }
+#endif
       fixed.pop_back();
 #else
       sum += permute(nums);
@@ -3109,14 +3134,16 @@ void leetcode_permuteData() {
 
   CSolPermute obj;
   CSolPermuteVK objVK;
+  CSolPermuteSophia objSophia;
 
   enum _IMPLT_ID { IMPLT_SOPHIA = 0, IMPLT_VK };
 
   CSolPermuteBase *sol;
 
-  int impltID = IMPLT_VK;
+  int impltID = IMPLT_SOPHIA;
   if (impltID == IMPLT_SOPHIA) {
-    sol = &obj;
+    // sol = &obj;
+    sol = &objSophia;
   } else {
     sol = &objVK;
   }
@@ -3136,8 +3163,18 @@ void leetcode_permuteData() {
   //                                key : "1-1-2"
 
   // v0: backtracking
-  // v1: (backtracking + repeated case)
-  // v2: (backtracking + repeated case) + memorization //TBV
+  // v1: (backtracking + repeated case) <== initial implementation
+  // v2: (backtracking + repeated case) + memorization
+
+  //-- non-repeated case --
+  // time complexity O(M * N! )
+
+  //-- repeated case --
+  // time complexity O(N * N!/(A! B! ....)  )
+
+  // -- extension --
+  // P(N,N) -> P(N, K) (?)
+  // C(N,K) (?)
 
   in = {1, 2, 3}; // 3!
   printf("num = %d (ans: 6)\n", sol->permute(in));
@@ -3158,11 +3195,88 @@ public:
   }
 };
 
+class CPrefixScoreLUT : public CPrefixScoreBase {
+public:
+  vector<int> sumPrefixScores(vector<string> &words) {
+    // "abc","ab","bc","b"
+    unordered_map<string, int> prefixMemo;
+
+    // find all prefix(es)
+    for (auto word : words) {
+      while (!word.empty()) {
+        prefixMemo[word] = 0;
+        word.pop_back();
+      }
+    }
+
+    // abc, ab, a, bc, b
+    //  1    2  2  1   2
+
+    // find the # of appearances of each prefix
+    for (auto word : words) {
+      // abc -> abc, ab, a = 1+2+2 = 5
+      // ab -> ab, a = 2+2 = 4
+      // bc -> bc, b = 1+2 = 3
+      // b  -> b = 2
+
+      while (!word.empty()) {
+        prefixMemo[word]++;
+        word.pop_back();
+      }
+    }
+
+    // sum up the # of apperances for each word
+    vector<int> scores;
+    for (auto word : words) {
+      int sum = 0;
+      while (!word.empty()) {
+        sum += prefixMemo[word];
+        word.pop_back();
+      }
+      scores.push_back(sum);
+    }
+
+    return scores;
+  }
+};
+
 class CPrefixScore : public CPrefixScoreBase {
+  class TrieNode {
+  public:
+    unordered_map<char, TrieNode *> children;
+    int val;
+
+    TrieNode(int x) : val(0) {}
+  };
+
 public:
   vector<int> sumPrefixScores(vector<string> &words) {
     vector<int> scores;
-    //HW1026
+    // HW1026
+    TrieNode *root = new TrieNode(0);
+    for (auto word : words) {
+      TrieNode *node = root;
+      for (auto ch : word) {
+        if (!node->children.count(ch)) {
+          node->children[ch] = new TrieNode(0);
+        }
+        node = node->children[ch];
+        node->val += 1; // 每次經過此節點，增加計數
+      }
+    }
+    for (auto word : words) {
+      TrieNode *node = root;
+      int score = 0;
+      for (auto ch : word) {
+        if (!node->children.count(ch)) {
+          break;
+        }
+        node = node->children[ch];
+        // cout<<node->val<<endl;
+        score = score + node->val;
+      }
+      scores.push_back(score);
+    }
     return scores;
   }
 };
@@ -3225,16 +3339,23 @@ void leetcode_prefix_score() {
   */
 
   CPrefixScore objDerived;
+  CPrefixScoreLUT objLUT;
   CPrefixScoreBase *obj = nullptr;
 
+  //
+  // Linked list <-> LUT / Hash table
+  //
   enum IMPLT_ID_ {
-    IMPLT_DERIVED = 0,
+    IMPLT_DERIVED = 0, // O(NM) (Linked list)
+    IMPLT_LUT,         // O(MN) (LUT)
   };
 
-  int impltID = IMPLT_DERIVED;
+  int impltID = IMPLT_LUT;
 
   if (impltID == IMPLT_DERIVED) {
     obj = &objDerived;
+  } else if (impltID == IMPLT_LUT) {
+    obj = &objLUT;
   } else {
     printf("not a supported implementation\n");
     exit(-1);
