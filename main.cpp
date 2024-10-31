@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
     leetcode_prefix_score();
     break;
   case 104: // ordering conflict
-    // merge interval (TBV)
+    leetcode_merge_interval();
     break;
   default:
     printf("not a supproted ID : %d\n", testID);
@@ -160,6 +160,155 @@ int main(int argc, char **argv) {
   //  dynamic programming - targetsum
   //  miscs - FSM (hardware)
   //  graph theory (optional)
+}
+
+class CMergeIntervalBase {
+public:
+  virtual vector<vector<int>> merge(vector<vector<int>> &intervals) {
+    vector<vector<int>> merged;
+    printf("please derive your implementation from CmergeIntervalBase \n");
+    return merged;
+  }
+};
+
+class CMergeInterval : public CMergeIntervalBase {
+public:
+  vector<vector<int>> merge(vector<vector<int>> &intervals) {
+    // HW1031
+    return vector<vector<int>>(0);
+  }
+};
+
+void leetcode_merge_interval() {
+
+  // HW1031
+  // https://leetcode.com/problems/merge-intervals/description/
+
+  /*
+  Given an array of intervals where intervals[i] = [starti, endi], merge all
+  overlapping intervals, and return an array of the non-overlapping intervals
+  that cover all the intervals in the input.
+
+
+  Example 1:
+
+  Input: intervals = [[1,3],[2,6],[8,10],[15,18]]
+  Output: [[1,6],[8,10],[15,18]]
+  Explanation: Since intervals [1,3] and [2,6] overlap, merge them into [1,6].
+  Example 2:
+
+  Input: intervals = [[1,4],[4,5]]
+  Output: [[1,5]]
+  Explanation: Intervals [1,4] and [4,5] are considered overlapping.
+
+
+  Constraints:
+
+  1 <= intervals.length <= 10^4
+  intervals[i].length == 2
+  0 <= starti <= endi <= 10^4
+
+  */
+  CMergeInterval objDerived;
+  CMergeIntervalBase *obj;
+
+  obj = &objDerived;
+
+  vector<vector<int>> intervals;
+  vector<vector<int>> mergedIntervals;
+  intervals.push_back({1, 3});
+  intervals.push_back({8, 10});
+  intervals.push_back({2, 6});
+  intervals.push_back({15, 18});
+
+  printf("== case 1: before merge ==\n");
+  for (auto &ir : intervals) {
+    printf("[%d, %d] ", ir[0], ir[1]);
+  }
+  printf("\n");
+  mergedIntervals = obj->merge(intervals);
+
+  printf("== after merge ==\n");
+  for (auto &ir : mergedIntervals) {
+    printf("[%d, %d] ", ir[0], ir[1]);
+  }
+  printf("\n");
+  printf("=>ans: [1, 6] [8, 10], [15, 18]\n\n\n");
+
+  printf("== case 2: before merge ==\n");
+  intervals.clear();
+  intervals.push_back({1, 4});
+  intervals.push_back({4, 5});
+  for (auto &ir : intervals) {
+    printf("[%d, %d] ", ir[0], ir[1]);
+  }
+  printf("\n");
+  mergedIntervals = obj->merge(intervals);
+
+  printf("== after merge ==\n");
+  for (auto &ir : mergedIntervals) {
+    printf("[%d, %d] ", ir[0], ir[1]);
+  }
+  printf("\n");
+  printf("=>ans: [1, 5]\n\n\n");
+
+  printf("== case 3: before merge ==\n");
+  intervals.clear();
+  intervals.push_back({1, 4});
+  intervals.push_back({2, 3});
+
+  for (auto &ir : intervals) {
+    printf("[%d, %d] ", ir[0], ir[1]);
+  }
+  printf("\n");
+  mergedIntervals = obj->merge(intervals);
+
+  printf("== after merge ==\n");
+  for (auto &ir : mergedIntervals) {
+    printf("[%d, %d] ", ir[0], ir[1]);
+  }
+  printf("\n");
+  printf("=>ans: [1, 4]\n\n\n");
+
+  printf("== case 4: before merge ==\n");
+  intervals.clear();
+  intervals.push_back({1, 4});
+  intervals.push_back({0, 2});
+  intervals.push_back({3, 5});
+
+  for (auto &ir : intervals) {
+    printf("[%d, %d] ", ir[0], ir[1]);
+  }
+  printf("\n");
+  mergedIntervals = obj->merge(intervals);
+
+  printf("== after merge ==\n");
+  for (auto &ir : mergedIntervals) {
+    printf("[%d, %d] ", ir[0], ir[1]);
+  }
+  printf("\n");
+  printf("=>ans: [0, 5]\n\n\n");
+
+  printf("== case 5: before merge ==\n");
+  intervals.clear();
+  intervals.push_back({2, 3});
+  intervals.push_back({5, 5});
+  intervals.push_back({2, 2});
+  intervals.push_back({3, 4});
+  intervals.push_back({3, 4});
+
+  for (auto &ir : intervals) {
+    printf("[%d, %d] ", ir[0], ir[1]);
+  }
+  printf("\n");
+  mergedIntervals = obj->merge(intervals);
+
+  printf("== after merge ==\n");
+  for (auto &ir : mergedIntervals) {
+    printf("[%d, %d] ", ir[0], ir[1]);
+  }
+  printf("\n");
+  printf("=>ans: [2, 4], [5, 5]\n\n\n");
 }
 
 struct STreeNode {

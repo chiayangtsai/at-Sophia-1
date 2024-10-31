@@ -43,3 +43,4 @@ void basic_class_usage();
 void leetcode_functionParsing();
 void leetcode_permuteData();
 void leetcode_prefix_score();
+void leetcode_merge_interval();
